@@ -19,6 +19,7 @@ export default function Home() {
     LOADED: "loaded",
     ERROR: "error",
   }
+  
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
   const [status, setStatus] = useState<string>(LOADING_STATES.LOADING);
@@ -43,10 +44,8 @@ export default function Home() {
       });
   }, []);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value ? e.target.value.toLowerCase() : "";
-
-    const filteredAdvocates = advocates.filter((advocate) => {
+  const filterAdvocates = (searchTerm: string) => {
+    return advocates.filter((advocate) => {
       return (
         advocate.firstName.toLowerCase().includes(searchTerm) ||
         advocate.lastName.toLowerCase().includes(searchTerm) ||
@@ -57,8 +56,20 @@ export default function Home() {
         advocate.phoneNumber.toString().includes(searchTerm)
       );
     });
+  }
 
-    setFilteredAdvocates(filteredAdvocates);
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value ? e.target.value.toLowerCase() : "";
+    setFilteredAdvocates(filterAdvocates(searchTerm));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const sanitizedValue = e.currentTarget.value.toLowerCase();
+    if (e.key === "Enter") {
+      setFilteredAdvocates(filterAdvocates(sanitizedValue));
+    } else if (e.key === "Tab") {
+      setFilteredAdvocates(filterAdvocates(sanitizedValue));
+    }
   };
 
   const onClick = () => {
@@ -79,7 +90,7 @@ export default function Home() {
               <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
             </svg>
           </div>
-          <input className="block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm placeholder:italic placeholder:text-slate-400 focus:outline-none focus:border-sky-500 sm:text-sm" placeholder="Search advocates" onChange={onChange} />
+          <input className="block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm placeholder:italic placeholder:text-slate-400 focus:outline-none focus:border-sky-500 sm:text-sm" placeholder="Search advocates" onChange={onChange} onKeyDown={handleKeyPress}/>
         </div>
         <button className="bg-transparent text-slate-700 font-semibold hover:text-sky-500 hover:bg-transparent hover:border-sky-500 rounded-md py-2 px-4 border border-slate-300 rounded-md" onClick={onClick}>Reset search</button>
         </form>
@@ -100,7 +111,7 @@ export default function Home() {
       status === LOADING_STATES.LOADED &&
           <table className="w-full table-auto border-collapse border border-gray-400">
             <thead >
-              <tr >
+              <tr className="bg-gray-300 border-b border-gray-400">
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>City</th>
@@ -113,7 +124,7 @@ export default function Home() {
             <tbody>
               {filteredAdvocates.map((advocate) => {
                 return (
-                  <tr className="border border-gray-400" key={advocate.id}>
+                  <tr className="odd:bg-white even:bg-gray-100 border-b border-gray-200 text-center" key={advocate.id}>
                     <td>{advocate.firstName}</td>
                     <td>{advocate.lastName}</td>
                     <td>{advocate.city}</td>
